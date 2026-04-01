@@ -330,17 +330,33 @@ document.addEventListener('DOMContentLoaded', function() {
         const container = document.getElementById('cases-grid');
         portfolioData.caseStudies.forEach(study => {
             const card = document.createElement('div');
-            card.className = 'group cursor-pointer bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-3 h-full';
-            card.onclick = () => openCaseStudy(study);
+            card.className = 'group bg-white dark:bg-slate-800 rounded-3xl p-4 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-3 h-full';
+
+            // Build structure: image on top, then title + subtitle + Read more button below
             card.innerHTML = `
-                <div class="relative overflow-hidden rounded-2xl mb-6 h-48 md:h-56 lg:h-64">
-                    <img src="${study.image}" alt="${study.title}" loading="lazy" decoding="async" width="800" height="500" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
-                    <div class="absolute bottom-4 left-4 right-4">
-                        <h3 class="text-2xl font-bold text-white drop-shadow-lg mb-2">${study.title}</h3>
-                        <p class="text-accent font-semibold text-lg drop-shadow-md">${study.subtitle}</p>
-                    </div>
+                <div class="overflow-hidden rounded-2xl mb-4 h-48 md:h-56 lg:h-64">
+                    <img src="${study.image}" alt="${study.title}" loading="lazy" decoding="async" width="800" height="500" class="w-full h-full object-cover transition-transform duration-700">
+                </div>
+                <div class="px-2 py-3 text-center">
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">${study.title}</h3>
+                    <p class="text-gray-600 dark:text-gray-300 mb-4">${study.subtitle}</p>
+                    <button class="read-more inline-block px-5 py-2 rounded-full bg-accent text-white font-semibold hover:opacity-90" type="button">Read more</button>
                 </div>
             `;
+
+            // Open modal when either card is clicked or Read more button is activated (keyboard accessible)
+            card.addEventListener('click', (e) => {
+                // If clicked on the button, let the button handler run; otherwise open modal
+                if (e.target && e.target.classList && e.target.classList.contains('read-more')) return;
+                openCaseStudy(study);
+            });
+
+            const btn = card.querySelector('.read-more');
+            if (btn) {
+                btn.addEventListener('click', (e) => { e.stopPropagation(); openCaseStudy(study); });
+                btn.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openCaseStudy(study); } });
+            }
+
             container.appendChild(card);
         });
     }
@@ -404,27 +420,51 @@ document.addEventListener('DOMContentLoaded', function() {
     function renderTimeline() {
         const container = document.getElementById('timeline');
         portfolioData.timeline.forEach((item, index) => {
+            const dir = index % 2 === 0 ? 'left' : 'right';
+            const mdFlex = index % 2 === 0 ? 'md:flex-row-reverse' : 'md:flex-row';
             const event = document.createElement('div');
-            event.className = `flex items-center mb-12 ${index % 2 === 0 ? 'flex-row-reverse' : ''} group`;
+            // Use responsive classes: on mobile stack centered, on md+ alternate sides
+            event.className = `flex flex-col md:flex items-center mb-12 group ${mdFlex}`;
+
             event.innerHTML = `
                 <div class="flex flex-col items-center w-full sm:w-1/2">
                     <div class="w-6 h-6 bg-accent dark:bg-primary rounded-full shadow-lg z-10 group-hover:scale-110 transition-all duration-300 flex items-center justify-center">
                         <div class="w-2 h-2 bg-white dark:bg-slate-900 rounded-full shadow-md"></div>
                     </div>
                 </div>
-                <div class="w-full sm:w-5/12 px-6 py-6 bg-white dark:bg-slate-800 rounded-3xl shadow-xl group-hover:shadow-2xl transition-all duration-300 border border-gray-100 dark:border-slate-700 hover:border-accent/50 dark:hover:border-primary/50">
+                <div class="timeline-card w-3/4 md:w-5/12 px-6 py-6 bg-white dark:bg-slate-800 rounded-3xl shadow-xl group-hover:shadow-2xl transition-all duration-300 border border-gray-100 dark:border-slate-700 hover:border-accent/50 dark:hover:border-primary/50 timeline-item from-${dir}" data-direction="${dir}">
                     <h4 class="text-xl font-bold text-primary dark:text-accent mb-2">${item.title}</h4>
-                    <p class="text-lg text-gray-600 dark:text-gray-400 mb-3 font-medium">${item.date}</p>
+                    <p class="text-sm md:text-lg text-gray-600 dark:text-gray-400 mb-3 font-medium">${item.date}</p>
                     <p class="text-gray-700 dark:text-gray-300 leading-relaxed">${item.description}</p>
                 </div>
             `;
+
             container.appendChild(event);
         });
 
-        // Timeline line
+        // Timeline central line (keeps same appearance)
         const line = document.createElement('div');
         line.className = 'absolute left-1/2 transform -translate-x-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-accent/30 dark:from-primary/30 to-primary/30 dark:to-accent/30';
         container.appendChild(line);
+
+        // Initialize scroll-triggered timeline animations
+        initTimelineAnimations();
+    }
+
+    function initTimelineAnimations() {
+        const items = document.querySelectorAll('.timeline-item');
+        if (!items.length) return;
+        const io = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('in-view');
+                }
+            });
+        }, { threshold: 0.15 });
+
+        items.forEach(item => {
+            io.observe(item);
+        });
     }
 
     function openCaseStudy(study) {

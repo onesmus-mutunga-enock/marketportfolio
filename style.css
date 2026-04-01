@@ -207,3 +207,79 @@ button:focus {
     color: #e6eef6;
     box-shadow: 0 8px 24px rgba(0,0,0,0.6);
 }
+
+/* Ensure mobile off-canvas menu has a solid background in dark mode so it doesn't blend
+   with underlying content (overrides the general .dark [class*="bg-white"] rule). */
+.dark #mobile-menu {
+    background-color: #0b1220 !important;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 20px 40px rgba(2,6,23,0.6);
+}
+
+/* Timeline slide-in animations and responsive sizing for mobile */
+.timeline-item {
+    opacity: 0;
+    transition: transform 600ms cubic-bezier(.2,.9,.2,1), opacity 600ms cubic-bezier(.2,.9,.2,1);
+}
+.timeline-item.from-left { transform: translateX(-36px); }
+.timeline-item.from-right { transform: translateX(36px); }
+.timeline-item.in-view { opacity: 1; transform: translateX(0); }
+
+.timeline-card { /* responsive width helper applied by JS */ }
+
+@media (max-width: 767px) {
+    /* Make timeline cards centered and larger (3/4 width) on mobile while keeping height unchanged */
+    .timeline-card {
+        width: 75%;
+        max-width: 720px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* Make reading content font-size match footer certification (text-sm = 0.875rem)
+       Apply broadly to paragraphs and common text size utilities on small screens. */
+    section p, article p, .text-lg, .text-base, .hero-title, .hero-title + p {
+        font-size: 0.875rem !important;
+        line-height: 1.4 !important;
+    }
+
+    /* Ensure mobile menu has clear separation and visible shadow */
+    #mobile-menu {
+        box-shadow: 0 24px 48px rgba(2,6,23,0.55);
+    }
+
+    /* Make profile image larger and perfectly circular on small screens */
+    .profile-img {
+        width: 75vw !important;
+        height: 75vw !important;
+        max-width: 520px;
+        border-radius: 9999px !important;
+        object-fit: cover !important;
+        /* Prefer face area: shift image slightly up on mobile so face is centered */
+        object-position: 50% 35% !important;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
+/* Default object-position for larger screens keeps the image centered */
+.profile-img {
+    object-position: center center;
+}
+
+/* Normalize resume reading font on small screens to match site reading content */
+@media (max-width: 767px) {
+    #resume p,
+    #resume li,
+    #resume .group p,
+    #resume .group li {
+        font-size: 0.875rem !important;
+        line-height: 1.4 !important;
+    }
+
+    /* Slightly tighten resume headings on very small screens */
+    #resume h3, #resume h4 {
+        font-size: 1.125rem !important;
+    }
+}
