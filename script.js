@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 link: '#'
             },
             {
-                title: 'Social Media Campaign Mockup',
+                title: 'Social Media Campaign ',
                 description: 'Campaign concept for retail product merchandising and promotion',
                 image: 'resource/social-media.jpg',
                 link: '#'
